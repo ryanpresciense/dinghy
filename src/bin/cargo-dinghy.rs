@@ -89,7 +89,12 @@ fn main() {
                     .arg(::clap::Arg::with_name("NO_DEFAULT_FEATURES")
                         .long("no-default-features")
                         .help("Do not build the `default` feature"))
-                    .arg(::clap::Arg::with_name("ARGS").multiple(true).help("test arguments")))
+                    .arg(::clap::Arg::with_name("ARGS").multiple(true).help("test arguments"))
+                    .arg(::clap::Arg::with_name("UID")
+                        .long("user_id")
+                        .short("uid")
+                        .takes_value(true)
+                        .help("user id to use to run commands (Android only)")))
                 .subcommand(::clap::SubCommand::with_name("run")
                     .arg(::clap::Arg::with_name("DEBUGGER")
                         .long("debugger")
@@ -136,7 +141,12 @@ fn main() {
                         .short("default")
                         .short("features")
                         .help("Do not build the `default` feature"))
-                    .arg(::clap::Arg::with_name("ARGS").multiple(true).help("test arguments")))
+                    .arg(::clap::Arg::with_name("ARGS").multiple(true).help("test arguments"))
+                    .arg(::clap::Arg::with_name("UID")
+                        .long("user_id")
+                        .short("uid")
+                        .takes_value(true)
+                        .help("user id to use to run commands (Android only)")))
                 .subcommand(::clap::SubCommand::with_name("bench")
                     .arg(::clap::Arg::with_name("SPEC")
                         .short("p")
@@ -194,7 +204,12 @@ fn main() {
                         .short("default")
                         .short("features")
                         .help("Do not build the `default` feature"))
-                    .arg(::clap::Arg::with_name("ARGS").multiple(true).help("test arguments")))
+                    .arg(::clap::Arg::with_name("ARGS").multiple(true).help("test arguments"))
+                    .arg(::clap::Arg::with_name("UID")
+                        .long("user_id")
+                        .short("uid")
+                        .takes_value(true)
+                        .help("user id to use to run commands (Android only)")))
                 .subcommand(::clap::SubCommand::with_name("build")
                     .arg(::clap::Arg::with_name("SPEC")
                         .short("p")
@@ -316,11 +331,13 @@ fn prepare_and_run(d: &dinghy::Device, subcommand: &str, matches: &clap::ArgMatc
             d.install_app(&app.as_ref())?;
             if matches.is_present("DEBUGGER") {
                 println!("DEBUGGER");
-                d.debug_app(app.as_ref(),
+                d.debug_app(matches.value_of("UID").map(str::to_string),
+                               app.as_ref(),
                                &*args.iter().map(|s| &s[..]).collect::<Vec<_>>(),
                                &*envs.iter().map(|s| &s[..]).collect::<Vec<_>>())?;
             } else {
-                d.run_app(app.as_ref(),
+                d.run_app(matches.value_of("UID").map(str::to_string),
+                             app.as_ref(),
                              &*args.iter().map(|s| &s[..]).collect::<Vec<_>>(),
                              &*envs.iter().map(|s| &s[..]).collect::<Vec<_>>())?;
             }

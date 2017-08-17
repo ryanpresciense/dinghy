@@ -111,7 +111,8 @@ impl Device for SshDevice {
         }
         Ok(())
     }
-    fn run_app(&self, app_path: &path::Path, args: &[&str], envs: &[&str]) -> Result<()> {
+    fn run_app(&self, uid: Option<String>, app_path: &path::Path, args: &[&str], envs: &[&str]) -> Result<()> {
+        if uid.is_some() { return Err(Error::from("UID not implemented for SSH")) };
         let user_at_host = format!("{}@{}", self.config.username, self.config.hostname);
         let prefix = self.config.path.clone().unwrap_or("/tmp".into());
         let app_name = app_path.file_name().unwrap();
@@ -145,7 +146,7 @@ impl Device for SshDevice {
         }
         Ok(())
     }
-    fn debug_app(&self, _app_path: &path::Path, _args: &[&str], _envs: &[&str]) -> Result<()> {
+    fn debug_app(&self, uid: Option<String>, _app_path: &path::Path, _args: &[&str], _envs: &[&str]) -> Result<()> {
         unimplemented!()
     }
 }

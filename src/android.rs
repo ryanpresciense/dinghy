@@ -130,7 +130,7 @@ impl Device for AndroidDevice {
 
         Ok(())
     }
-    fn run_app(&self, exe: &path::Path, args: &[&str], envs: &[&str]) -> Result<()> {
+    fn run_app(&self, uid: Option<String>, exe: &path::Path, args: &[&str], envs: &[&str]) -> Result<()> {
         let exe_name = exe.file_name()
             .and_then(|p| p.to_str())
             .expect("exe should be a file in android mode");
@@ -138,19 +138,21 @@ impl Device for AndroidDevice {
         let target_dir = format!("/data/local/tmp/dinghy/{}", exe_name);
         let target_exe = format!("{}/{}", target_dir, exe_name);
 
-        let stat = Command::new(adb_bin_name())
+        let mut command = Command::new(adb_bin_name());
+        command
             .arg("-s").arg(&*self.id)
             .arg("shell")
-            .arg(&*format!("DINGHY=1 {}", envs.join(" ")))
-            .arg(&*target_exe)
-            .args(args)
-            .status()?;
-        if !stat.success() {
+            .arg(&*format!("DINGHY=1 {}", envs.join(" ")));
+        if let Some(uid) = uid {
+            command.arg("su").arg(uid);
+        };
+        command.arg(&*target_exe).args(args);
+        if !command.status()?.success() {
             Err("failure in android run")?;
         }
         Ok(())
     }
-    fn debug_app(&self, _app_path: &path::Path, _args: &[&str], _envs: &[&str]) -> Result<()> {
+    fn debug_app(&self, uid: Option<String>, _app_path: &path::Path, _args: &[&str], _envs: &[&str]) -> Result<()> {
         unimplemented!()
     }
 }
